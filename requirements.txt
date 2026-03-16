@@ -1,5 +1,3 @@
-
-python-telegram-bot==20.7
+streamlit
 google-generativeai
-gTTS
-SpeechRecognition
+pillow
