@@ -1,4 +1,0 @@
-pyTelegramBotAPI==4.15.4
-google-generativeai==0.4.1
-pillow==10.2.0
-gTTS==2.5.1
