@@ -1,256 +1,153 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Lara AI</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-
-<style>
-
-body{
-font-family:'Cairo',sans-serif;
-background:#0b0b0c;
-color:white;
-}
-
-#chat{
-height:calc(100vh - 150px);
-overflow-y:auto;
-}
-
-.user{
-background:#2563eb;
-border-radius:20px 20px 0 20px;
-}
-
-.ai{
-background:#1f2937;
-border-radius:20px 20px 20px 0;
-}
-
-</style>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Wimon AI | Kareem Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0e0e0f; color: #ffffff; overflow: hidden; height: 100dvh; }
+        .glass { background: rgba(25, 25, 27, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .user-msg { background: #3659ba; border-radius: 18px 18px 0 18px; }
+        .ai-msg { background: #1c1c1e; border-radius: 18px 18px 18px 0; border: 1px solid #2c2c2e; }
+        #chat-scroller { height: calc(100dvh - 140px); overflow-y: auto; padding: 20px; }
+        .typing::after { content: '...'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+    </style>
 </head>
-
-<body class="flex flex-col h-screen">
-
-<header class="flex justify-between items-center p-4 border-b border-gray-700">
-
-<h1 class="text-xl font-bold text-blue-400">
-Lara AI
-</h1>
-
-<div class="flex gap-3">
-
-<button onclick="startVoice()">🎤</button>
-<button onclick="imageInput.click()">🖼</button>
-<button onclick="clearChat()">🗑</button>
-
-</div>
-
-</header>
-
-<div id="chat" class="p-5 space-y-4"></div>
-
-<footer class="p-4 border-t border-gray-700 flex gap-2">
-
-<input id="input"
-class="flex-1 bg-gray-900 p-3 rounded-xl outline-none"
-placeholder="اسأل Lara...">
-
-<button onclick="send()"
-class="bg-blue-600 px-6 rounded-xl">
-Send
-</button>
-
-</footer>
-
-<input type="file" id="imageInput" class="hidden" accept="image/*">
-
-<script>
-
-const API_KEY="AIzaSyA7KrdFXm_R3Up4oiUA7I9WL29ijh-_Wi0"
-
-const MODEL="gemini-1.5-flash-latest"
-
-let imageData=null
-
-const chat=document.getElementById("chat")
-
-let memory=JSON.parse(localStorage.getItem("lara_memory")||"[]")
-
-function saveMemory(){
-
-localStorage.setItem("lara_memory",JSON.stringify(memory))
-
-}
-
-function bubble(role,text,save=true){
-
-const div=document.createElement("div")
-
-div.className=`flex ${role==="user"?"justify-end":"justify-start"}`
-
-div.innerHTML=`
-<div class="${role==="user"?"user":"ai"} p-3 max-w-[80%] text-sm">
-${text}
-</div>
-`
-
-chat.appendChild(div)
-
-chat.scrollTop=chat.scrollHeight
-
-if(save){
-
-memory.push({role,text})
-
-saveMemory()
-
-}
-
-return div.firstChild
-
-}
-
-memory.forEach(m=>bubble(m.role,m.text,false))
-
-function clearChat(){
-
-localStorage.removeItem("lara_memory")
-location.reload()
-
-}
-
-imageInput.onchange=function(){
-
-const file=this.files[0]
-
-const reader=new FileReader()
-
-reader.onload=e=>{
-
-imageData=e.target.result
-
-bubble("user","🖼 تم رفع صورة")
-
-}
-
-reader.readAsDataURL(file)
-
-}
-
-function startVoice(){
-
-const rec=new(window.SpeechRecognition||window.webkitSpeechRecognition)()
-
-rec.lang="ar"
-
-rec.start()
-
-rec.onresult=e=>{
-
-document.getElementById("input").value=e.results[0][0].transcript
-
-}
-
-}
-
-function typeWriter(el,text){
-
-let i=0
-
-function type(){
-
-if(i<text.length){
-
-el.innerHTML+=text.charAt(i)
-
-i++
-
-setTimeout(type,10)
-
-}
-
-}
-
-type()
-
-}
-
-async function send(){
-
-const input=document.getElementById("input")
-
-const text=input.value.trim()
-
-if(!text && !imageData) return
-
-bubble("user",text)
-
-input.value=""
-
-const aiBubble=bubble("ai","...")
-
-let prompt=text
-
-try{
-
-const res=await fetch(
-`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
-{
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-contents:[
-{
-parts:[
-{text:prompt},
-...(imageData?[{
-inline_data:{
-mime_type:"image/jpeg",
-data:imageData.split(",")[1]
-}
-}]:[])
-]
-}
-]
-
-})
-
-})
-
-const data=await res.json()
-
-const reply=data.candidates?.[0]?.content?.parts?.[0]?.text || "لا يوجد رد"
-
-aiBubble.innerHTML=""
-
-typeWriter(aiBubble,reply)
-
-imageData=null
-
-}catch(e){
-
-aiBubble.innerHTML="❌ خطأ في الاتصال"
-
-}
-
-}
-
-</script>
-
+<body class="flex flex-col">
+
+    <section id="auth-screen" class="fixed inset-0 z-[100] bg-[#0e0e0f] flex items-center justify-center p-6">
+        <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] text-center border-blue-500/20 shadow-2xl">
+            <span class="material-symbols-outlined text-6xl text-blue-500 mb-4">verified_user</span>
+            <h1 class="text-2xl font-bold mb-6">تسجيل دخول الإدارة</h1>
+            <input type="text" id="admin-name" placeholder="اسم المستخدم" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center mb-4 outline-none focus:border-blue-500">
+            <input type="password" id="admin-pass" placeholder="كلمة المرور" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center mb-6 outline-none focus:border-blue-500">
+            <button onclick="checkAdmin()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold active:scale-95 transition-all shadow-lg shadow-blue-600/30">تفعيل الوصول</button>
+        </div>
+    </section>
+
+    <main id="main-ui" class="hidden flex flex-col h-full opacity-0 transition-opacity duration-500">
+        <header class="h-16 glass flex items-center justify-between px-6 border-b border-white/10">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_8px_#22c55e]"></span>
+                <span class="font-bold text-blue-400 text-sm tracking-widest uppercase">Wimon Nexus</span>
+            </div>
+            <span id="user-display" class="text-[10px] font-bold text-gray-500 uppercase">Kareem Admin</span>
+        </header>
+
+        <div id="chat-scroller" class="flex-1 space-y-6">
+            <div class="ai-msg p-4 max-w-[85%] text-sm">
+                مرحباً بك يا <strong>Kareem</strong>. تم تحديث رابط البروتوكول. أنا جاهز للعمل الآن.
+            </div>
+        </div>
+
+        <footer class="p-4 bg-[#0e0e0f]">
+            <div class="max-w-4xl mx-auto flex items-center gap-2 glass rounded-[2rem] p-2 pr-4 shadow-2xl border-white/10">
+                <button onclick="document.getElementById('file-input').click()" class="p-2 text-gray-400 hover:text-blue-400"><span class="material-symbols-outlined">image</span></button>
+                <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this)">
+                <textarea id="user-input" rows="1" placeholder="أمر مباشر..." class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-sm resize-none"></textarea>
+                <button onclick="sendToAI()" class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all">
+                    <span class="material-symbols-outlined">send</span>
+                </button>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        const API_KEY = "AIzaSyA7KrdFXm_R3Up4oiUA7I9WL29ijh-_Wi0"; 
+        const MASTER_NAME = "Kareem";
+        const MASTER_PASS = "Kareem112233@";
+        let base64Image = null;
+
+        function checkAdmin() {
+            const u = document.getElementById('admin-name').value.trim();
+            const p = document.getElementById('admin-pass').value.trim();
+            if(u === MASTER_NAME && p === MASTER_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                const main = document.getElementById('main-ui');
+                main.classList.remove('hidden');
+                setTimeout(() => main.style.opacity = '1', 50);
+            } else { alert("بيانات الوصول غير صحيحة!"); }
+        }
+
+        function handleImage(input) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Image = e.target.result;
+                alert("تم إرفاق الصورة بنجاح");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function sendToAI() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if(!text && !base64Image) return;
+
+            addBubble('user', text);
+            input.value = '';
+            const loading = addBubble('ai', '<span class="typing">جاري معالجة البيانات</span>');
+
+            try {
+                // استخدام الرابط الذي اقترحته أنت
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: text || "Analyze this image" },
+                                ...(base64Image ? [{ inline_data: { mime_type: "image/jpeg", data: base64Image.split(',')[1] } }] : [])
+                            ]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    loading.innerHTML = `<span class="text-red-500">خطأ: ${data.error.message}</span>`;
+                    return;
+                }
+
+                const aiMsg = data.candidates[0].content.parts[0].text;
+                loading.innerHTML = "";
+                typeWriter(loading, aiMsg);
+                base64Image = null;
+
+            } catch (err) {
+                loading.innerHTML = "❌ حدث خطأ في الاتصال بالشبكة.";
+            }
+        }
+
+        function addBubble(role, content) {
+            const div = document.createElement('div');
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} w-full`;
+            div.innerHTML = `<div class="${role === 'user' ? 'user-msg' : 'ai-msg'} p-4 max-w-[85%] text-sm shadow-xl">${content}</div>`;
+            const scroller = document.getElementById('chat-scroller');
+            scroller.appendChild(div);
+            scroller.scrollTop = scroller.scrollHeight;
+            return div.firstChild;
+        }
+
+        function typeWriter(element, text) {
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, 15);
+                    document.getElementById('chat-scroller').scrollTop = document.getElementById('chat-scroller').scrollHeight;
+                }
+            }
+            type();
+        }
+    </script>
 </body>
 </html>
