@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,91 +10,79 @@
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #0e0e0f; color: #ffffff; overflow: hidden; height: 100dvh; }
         .glass { background: rgba(25, 25, 27, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .user-msg { background: linear-gradient(135deg, #3659ba, #25408f); border-radius: 18px 18px 0 18px; }
+        .user-msg { background: #3659ba; border-radius: 18px 18px 0 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .ai-msg { background: #1c1c1e; border-radius: 18px 18px 18px 0; border: 1px solid #2c2c2e; }
-        #chat-scroller { height: calc(100dvh - 140px); overflow-y: auto; padding-bottom: 20px; }
+        #chat-scroller { height: calc(100dvh - 140px); overflow-y: auto; padding: 20px; }
         .typing::after { content: '...'; animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
     </style>
 </head>
 <body class="flex flex-col">
 
-    <section id="auth-screen" class="fixed inset-0 z-[100] bg-[#0e0e0f] flex items-center justify-center p-6 transition-all duration-500">
-        <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] text-center shadow-2xl border-blue-500/20">
-            <div class="mb-6 text-blue-500 inline-block p-4 rounded-full bg-blue-500/10 border border-blue-500/20">
-                <span class="material-symbols-outlined text-6xl">account_circle</span>
-            </div>
-            <h1 class="text-2xl font-bold mb-1">تعريف الهوية</h1>
-            <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-[0.2em]">بروتوكول الوصول المشفر</p>
-            
-            <input type="text" id="admin-name" placeholder="اسم المستخدم" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center focus:border-blue-500 outline-none mb-4 transition-all">
-            <input type="password" id="admin-pass" placeholder="كلمة المرور" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center focus:border-blue-500 outline-none mb-4 transition-all">
-            <button onclick="checkAdmin()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20">فتح المحطة</button>
+    <section id="auth-screen" class="fixed inset-0 z-[100] bg-[#0e0e0f] flex items-center justify-center p-6">
+        <div class="glass w-full max-w-sm p-10 rounded-[2.5rem] text-center border-blue-500/20 shadow-2xl">
+            <span class="material-symbols-outlined text-6xl text-blue-500 mb-4">terminal</span>
+            <h1 class="text-2xl font-bold mb-6">نظام الوصول الآمن</h1>
+            <input type="text" id="admin-name" placeholder="اسم المستخدم" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center mb-4 outline-none focus:border-blue-500">
+            <input type="password" id="admin-pass" placeholder="كلمة المرور" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center mb-6 outline-none focus:border-blue-500">
+            <button onclick="checkAdmin()" class="w-full bg-blue-600 py-4 rounded-2xl font-bold active:scale-95 transition-all shadow-lg shadow-blue-600/30">دخول النظام</button>
         </div>
     </section>
 
-    <main id="main-ui" class="hidden flex flex-col h-full opacity-0 transition-opacity duration-700">
-        <header class="h-16 glass flex items-center justify-between px-6 border-b border-white/5 z-50">
-            <div class="flex items-center gap-3">
-                <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-                <span class="font-bold text-blue-400 tracking-tighter text-sm">WIMON NEXUS</span>
+    <main id="main-ui" class="hidden flex flex-col h-full opacity-0 transition-opacity duration-500">
+        <header class="h-16 glass flex items-center justify-between px-6 border-b border-white/5">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="font-bold text-blue-400 text-sm">WIMON NEXUS</span>
             </div>
-            <div class="flex items-center gap-4">
-                <span id="user-tag" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ADMIN</span>
-                <button onclick="location.reload()" class="material-symbols-outlined text-red-400/70 hover:text-red-400 transition-colors">power_settings_new</button>
-            </div>
+            <span id="user-display" class="text-[10px] font-bold text-gray-500">ADMIN</span>
         </header>
 
-        <div id="chat-scroller" class="p-4 space-y-6">
-            <div class="ai-msg p-5 max-w-[85%] text-sm leading-relaxed shadow-xl">
-                مرحباً بك يا <strong>Kareem</strong>. تم فك تشفير البروتوكول بنجاح. أنا جاهز للأوامر.
+        <div id="chat-scroller" class="flex-1 space-y-6">
+            <div class="ai-msg p-4 max-w-[85%] text-sm leading-relaxed">
+                مرحباً بك يا <strong>Kareem</strong>. تم تفعيل البروتوكول بنجاح باستخدام Gemini Flash.
             </div>
         </div>
 
-        <footer class="p-4 bg-[#0e0e0f]/90 backdrop-blur-xl">
-            <div class="max-w-4xl mx-auto flex items-center gap-2 glass rounded-[2rem] p-2 pr-4 border-white/10 shadow-2xl">
-                <button onclick="document.getElementById('file-input').click()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-blue-400"><span class="material-symbols-outlined">add_photo_alternate</span></button>
-                <input type="file" id="file-input" class="hidden" accept="image/*" onchange="previewImage(this)">
-                <textarea id="user-input" rows="1" placeholder="أمر عصبي مباشر..." class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-sm resize-none"></textarea>
-                <button onclick="sendToAI()" class="w-12 h-12 bg-blue-600 rounded-[1.2rem] flex items-center justify-center text-white shadow-lg active:scale-90 transition-all">
-                    <span class="material-symbols-outlined font-bold">arrow_upward</span>
+        <footer class="p-4 bg-[#0e0e0f]">
+            <div class="max-w-4xl mx-auto flex items-center gap-2 glass rounded-[2rem] p-2 pr-4 shadow-2xl border-white/10">
+                <button onclick="document.getElementById('file-input').click()" class="p-2 text-gray-400 hover:text-blue-400 transition-colors"><span class="material-symbols-outlined">add_a_photo</span></button>
+                <input type="file" id="file-input" class="hidden" accept="image/*" onchange="handleImage(this)">
+                
+                <textarea id="user-input" rows="1" placeholder="أمر مباشر..." class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-sm resize-none"></textarea>
+                
+                <button onclick="sendToAI()" class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg active:scale-90 transition-all">
+                    <span class="material-symbols-outlined">send</span>
                 </button>
             </div>
         </footer>
     </main>
 
     <script>
-        // التعديلات المهمة هنا
+        // البيانات اللي انت بعتها
         const API_KEY = "AIzaSyA7KrdFXm_R3Up4oiUA7I9WL29ijh-_Wi0"; 
         const MASTER_NAME = "Kareem";
         const MASTER_PASS = "Kareem112233@";
         let base64Image = null;
 
         function checkAdmin() {
-            const user = document.getElementById('admin-name').value.trim();
-            const pass = document.getElementById('admin-pass').value.trim();
-            
-            if(user === MASTER_NAME && pass === MASTER_PASS) {
-                const screen = document.getElementById('auth-screen');
-                screen.style.opacity = '0';
-                setTimeout(() => {
-                    screen.classList.add('hidden');
-                    const main = document.getElementById('main-ui');
-                    main.classList.remove('hidden');
-                    setTimeout(() => main.style.opacity = '1', 50);
-                    document.getElementById('user-tag').innerText = user;
-                }, 500);
-            } else {
-                alert("بيانات الوصول غير صحيحة! جرب مرة أخرى.");
-            }
+            const u = document.getElementById('admin-name').value.trim();
+            const p = document.getElementById('admin-pass').value.trim();
+            if(u === MASTER_NAME && p === MASTER_PASS) {
+                document.getElementById('auth-screen').style.display = 'none';
+                const main = document.getElementById('main-ui');
+                main.classList.remove('hidden');
+                setTimeout(() => main.style.opacity = '1', 50);
+                document.getElementById('user-display').innerText = u;
+            } else { alert("بيانات خاطئة!"); }
         }
 
-        function previewImage(input) {
+        function handleImage(input) {
             const file = input.files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 base64Image = e.target.result;
-                alert("تم تحميل الصورة بنجاح");
+                alert("تم إرفاق الصورة");
             };
             reader.readAsDataURL(file);
         }
@@ -106,11 +94,11 @@
 
             addBubble('user', text);
             input.value = '';
-            const loading = addBubble('ai', '<span class="typing">جاري المعالجة</span>');
+            const loading = addBubble('ai', '<span class="typing">جاري التحليل</span>');
 
             try {
-                // تعديل رابط الـ API ليكون أكثر دقة
-                const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+                // استخدمنا الموديل اللي في الـ cURL بتاعك بالضبط
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -126,25 +114,20 @@
                 });
 
                 const data = await response.json();
-                
-                if(data.error) {
-                    loading.innerHTML = `⚠️ خطأ تقني: ${data.error.message}`;
-                    return;
-                }
-
                 const aiMsg = data.candidates[0].content.parts[0].text;
                 loading.innerHTML = "";
                 typeWriter(loading, aiMsg);
                 base64Image = null;
             } catch (err) {
-                loading.innerHTML = "❌ فشل الاتصال بالسيرفر.";
+                loading.innerHTML = "⚠️ فشل في الاتصال بالبروتوكول.";
+                console.error(err);
             }
         }
 
         function addBubble(role, content) {
             const div = document.createElement('div');
-            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} w-full animate-in fade-in duration-300`;
-            div.innerHTML = `<div class="${role === 'user' ? 'user-msg' : 'ai-msg'} p-4 max-w-[88%] text-sm shadow-xl">${content}</div>`;
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} w-full`;
+            div.innerHTML = `<div class="${role === 'user' ? 'user-msg' : 'ai-msg'} p-4 max-w-[85%] text-sm shadow-xl">${content}</div>`;
             const scroller = document.getElementById('chat-scroller');
             scroller.appendChild(div);
             scroller.scrollTop = scroller.scrollHeight;
@@ -153,12 +136,11 @@
 
         function typeWriter(element, text) {
             let i = 0;
-            const speed = 15;
             function type() {
                 if (i < text.length) {
                     element.innerHTML += text.charAt(i);
                     i++;
-                    setTimeout(type, speed);
+                    setTimeout(type, 20);
                     document.getElementById('chat-scroller').scrollTop = document.getElementById('chat-scroller').scrollHeight;
                 }
             }
