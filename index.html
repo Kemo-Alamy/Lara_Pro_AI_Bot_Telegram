@@ -24,10 +24,11 @@
             <div class="mb-6 text-blue-500 inline-block p-4 rounded-full bg-blue-500/10 border border-blue-500/20">
                 <span class="material-symbols-outlined text-6xl">account_circle</span>
             </div>
-            <h1 class="text-2xl font-bold mb-1">أهلاً، Kareem</h1>
-            <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-[0.2em]">بروتوكول الوصول الخاص</p>
+            <h1 class="text-2xl font-bold mb-1">تعريف الهوية</h1>
+            <p class="text-gray-500 text-[10px] mb-8 uppercase tracking-[0.2em]">بروتوكول الوصول المشفر</p>
             
-            <input type="password" id="admin-pass" placeholder="كلمة المرور..." class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center focus:border-blue-500 outline-none mb-4 transition-all focus:ring-1 focus:ring-blue-500">
+            <input type="text" id="admin-name" placeholder="اسم المستخدم" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center focus:border-blue-500 outline-none mb-4 transition-all">
+            <input type="password" id="admin-pass" placeholder="كلمة المرور" class="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-center focus:border-blue-500 outline-none mb-4 transition-all">
             <button onclick="checkAdmin()" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-blue-600/20">فتح المحطة</button>
         </div>
     </section>
@@ -36,28 +37,26 @@
         <header class="h-16 glass flex items-center justify-between px-6 border-b border-white/5 z-50">
             <div class="flex items-center gap-3">
                 <div class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
-                <span class="font-bold text-blue-400 tracking-tighter">WIMON NEXUS</span>
+                <span class="font-bold text-blue-400 tracking-tighter text-sm">WIMON NEXUS</span>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Kareem Admin</span>
+                <span id="user-tag" class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ADMIN</span>
                 <button onclick="location.reload()" class="material-symbols-outlined text-red-400/70 hover:text-red-400 transition-colors">power_settings_new</button>
             </div>
         </header>
 
-        <div id="chat-scroller" class="p-4 space-y-6 custom-scrollbar">
+        <div id="chat-scroller" class="p-4 space-y-6">
             <div class="ai-msg p-5 max-w-[85%] text-sm leading-relaxed shadow-xl">
-                مرحباً بك يا <strong>Kareem</strong>. تم التعرف على البصمة الرقمية. المحطة العصبية تحت تصرفك الآن.
+                مرحباً بك يا <strong>Kareem</strong>. تم فك تشفير البروتوكول بنجاح. أنا جاهز للأوامر.
             </div>
         </div>
 
         <footer class="p-4 bg-[#0e0e0f]/90 backdrop-blur-xl">
             <div class="max-w-4xl mx-auto flex items-center gap-2 glass rounded-[2rem] p-2 pr-4 border-white/10 shadow-2xl">
-                <button onclick="document.getElementById('file-input').click()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-blue-400 transition-colors"><span class="material-symbols-outlined">add_photo_alternate</span></button>
+                <button onclick="document.getElementById('file-input').click()" class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-blue-400"><span class="material-symbols-outlined">add_photo_alternate</span></button>
                 <input type="file" id="file-input" class="hidden" accept="image/*" onchange="previewImage(this)">
-                
-                <textarea id="user-input" rows="1" placeholder="أمر عصبي مباشر..." class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-sm resize-none" oninput="this.style.height='';this.style.height=this.scrollHeight+'px'"></textarea>
-                
-                <button onclick="sendToAI()" class="w-12 h-12 bg-blue-600 rounded-[1.2rem] flex items-center justify-center text-white shadow-lg shadow-blue-600/30 active:scale-90 transition-all">
+                <textarea id="user-input" rows="1" placeholder="أمر عصبي مباشر..." class="flex-1 bg-transparent border-none focus:ring-0 py-3 text-sm resize-none"></textarea>
+                <button onclick="sendToAI()" class="w-12 h-12 bg-blue-600 rounded-[1.2rem] flex items-center justify-center text-white shadow-lg active:scale-90 transition-all">
                     <span class="material-symbols-outlined font-bold">arrow_upward</span>
                 </button>
             </div>
@@ -65,36 +64,37 @@
     </main>
 
     <script>
-        // الإعدادات الخاصة بك
-        const API_KEY = "AIzaSyA7KrdFXm_R3Up4oiUA7I9WL29ijh-_Wi0"; // API الخاص بك هنا
-        const ADMIN_NAME = "Kareem";
-        const ADMIN_PASS = "Kareem112233@"; // كلمة المرور المطلوبة
+        // التعديلات المهمة هنا
+        const API_KEY = "AIzaSyA7KrdFXm_R3Up4oiUA7I9WL29ijh-_Wi0"; 
+        const MASTER_NAME = "Kareem";
+        const MASTER_PASS = "Kareem112233@";
         let base64Image = null;
 
         function checkAdmin() {
-            const input = document.getElementById('admin-pass').value;
-            if(input === ADMIN_PASS) {
+            const user = document.getElementById('admin-name').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
+            
+            if(user === MASTER_NAME && pass === MASTER_PASS) {
                 const screen = document.getElementById('auth-screen');
                 screen.style.opacity = '0';
-                screen.style.transform = 'scale(1.1)';
                 setTimeout(() => {
                     screen.classList.add('hidden');
                     const main = document.getElementById('main-ui');
                     main.classList.remove('hidden');
                     setTimeout(() => main.style.opacity = '1', 50);
+                    document.getElementById('user-tag').innerText = user;
                 }, 500);
             } else {
-                alert("رمز الوصول غير صحيح! غير مصرح لك يا صديقي.");
+                alert("بيانات الوصول غير صحيحة! جرب مرة أخرى.");
             }
         }
 
         function previewImage(input) {
             const file = input.files[0];
-            if(!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 base64Image = e.target.result;
-                alert("تم تحميل الصورة بنجاح (جاهزة للتحليل)");
+                alert("تم تحميل الصورة بنجاح");
             };
             reader.readAsDataURL(file);
         }
@@ -104,20 +104,21 @@
             const text = input.value.trim();
             if(!text && !base64Image) return;
 
-            addBubble('user', text + (base64Image ? " [تحليل صورة]" : ""));
+            addBubble('user', text);
             input.value = '';
-            input.style.height = 'auto';
-            
             const loading = addBubble('ai', '<span class="typing">جاري المعالجة</span>');
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+                // تعديل رابط الـ API ليكون أكثر دقة
+                const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{
                             parts: [
-                                { text: `User is Admin Kareem. Always respond with high-level intelligence. Message: ${text || "Analyze this image"}` },
+                                { text: text || "حلل الصورة" },
                                 ...(base64Image ? [{ inline_data: { mime_type: "image/jpeg", data: base64Image.split(',')[1] } }] : [])
                             ]
                         }]
@@ -125,21 +126,25 @@
                 });
 
                 const data = await response.json();
-                if(data.error) throw new Error(data.error.message);
+                
+                if(data.error) {
+                    loading.innerHTML = `⚠️ خطأ تقني: ${data.error.message}`;
+                    return;
+                }
 
                 const aiMsg = data.candidates[0].content.parts[0].text;
                 loading.innerHTML = "";
                 typeWriter(loading, aiMsg);
                 base64Image = null;
             } catch (err) {
-                loading.innerHTML = `<span class="text-red-400">خطأ في السيرفر: ${err.message}</span>`;
+                loading.innerHTML = "❌ فشل الاتصال بالسيرفر.";
             }
         }
 
         function addBubble(role, content) {
             const div = document.createElement('div');
-            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} w-full animate-in fade-in slide-in-from-bottom-2 duration-300`;
-            div.innerHTML = `<div class="${role === 'user' ? 'user-msg' : 'ai-msg'} p-4 max-w-[88%] text-sm shadow-2xl">${content}</div>`;
+            div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'} w-full animate-in fade-in duration-300`;
+            div.innerHTML = `<div class="${role === 'user' ? 'user-msg' : 'ai-msg'} p-4 max-w-[88%] text-sm shadow-xl">${content}</div>`;
             const scroller = document.getElementById('chat-scroller');
             scroller.appendChild(div);
             scroller.scrollTop = scroller.scrollHeight;
@@ -159,9 +164,6 @@
             }
             type();
         }
-
-        // Enter Key Listener
-        document.getElementById('admin-pass').addEventListener('keypress', (e) => { if(e.key === 'Enter') checkAdmin(); });
     </script>
 </body>
 </html>
